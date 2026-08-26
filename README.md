@@ -1,6 +1,20 @@
 # Riptides core capability demo
 
-Four acts against a real control plane, on a node running the shipped packages:
+**Riptides gives plain TCP sockets a cryptographic identity and mutual TLS with
+no changes to the application** — no sidecar, no SDK, no certificates in your
+code. Interception happens in a Linux kernel module, so workloads are not
+modified, relinked or reconfigured, and it can also inject credentials into
+outbound requests and enforce policy on the traffic it sees.
+
+This repository demonstrates that on one Linux box, in four short acts, using
+five **unmodified upstream containers** — nginx, go-httpbin, redis and curl. They
+speak plaintext and hold no keys, certificates or tokens; everything the demo
+shows is added underneath them. Each act pauses between steps so you can talk
+over it, and prints the evidence for what it claims — packet captures, the
+kernel's own connection table, and what the application itself sent.
+
+Expect about fifteen minutes end to end once you have a control plane and a
+joined node.
 
 | Act | Shows | Runs |
 |---|---|---|
@@ -390,33 +404,9 @@ same connection). Turn the idle rate down further with `INTERVAL` on the
 `redis-cli` service in `app/compose.yaml` — raise it to keep the console quiet,
 lower it for a snappier revocation demo.
 
-## Known gaps
-
-- **No local Prometheus endpoint.** A daemon installed by the docs installer
-  exports telemetry over OTLP to the control plane rather than serving
-  `/metrics`, so `riptides_driver_credential_injection_total` is counted in the
-  console. Act 3 reports that instead of showing an empty grep. Set
-  `METRICS_URL` in `.env` if your daemon does serve it.
-- **Host networking only.** Bridge networking is not attempted.
-- **Rotating a credential by editing its Secret may not take effect promptly.**
-  Act 3 tries that first, waits for the result rather than assuming it, and falls
-  back to re-creating the `CredentialSource` — which propagates in a few seconds
-  every time — saying on screen which path it took.
-
 ## Teardown
 
 ```bash
 make reset   # delete the demo policy, restart the app clean, ready to run again
 make down    # also stop the containers; riptides itself is left alone
 ```
-
-## Kubernetes
-
-Not built. The `Service`, `CredentialSource` and `CredentialBinding` manifests
-carry over unchanged; the `WorkloadIdentity` `scope` moves from `daemon.id` to a
-`DaemonGroup`, selectors move from `process:*` to `k8s:*`, the apps become
-Deployments, and the daemon arrives via its Helm chart with
-`authPlugin.type: K8sSAT`.
-The constraint to know up front: the chart's `driver-loader` init container
-always runs and fetches a module built for the node's kernel, so GKE/EKS is the
-realistic target and kind-on-macOS is not.
