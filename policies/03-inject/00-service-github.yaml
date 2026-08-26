@@ -1,0 +1,16 @@
+# The external service. The credential binding's injection selectors match this
+# service's LABELS, not its name — that indirection is what lets one credential
+# be aimed at a set of destinations.
+apiVersion: core.riptides.io/v1alpha1
+kind: Service
+metadata:
+  name: demo-github-api
+  namespace: riptides-system
+spec:
+  external: true
+  tls: true
+  labels:
+    app: github-api
+  addresses:
+    - address: api.github.com
+      port: 443

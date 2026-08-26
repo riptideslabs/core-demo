@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1840" height="1840" viewBox="0 -405 1840 1840">
+<rect x="0" y="-405" width="1840" height="1840" fill="#ffffff"/>
+<defs><marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="context-stroke"/></marker></defs>
+<rect x="40" y="20" width="320" height="170" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="560" y="20" width="900" height="170" rx="10" fill="#c5f6fa" stroke="#0c8599" stroke-width="2"/>
+<rect x="585" y="78" width="270" height="92" rx="10" fill="none" stroke="#0c8599" stroke-width="2"/>
+<rect x="875" y="78" width="285" height="92" rx="10" fill="none" stroke="#0c8599" stroke-width="2"/>
+<rect x="1180" y="78" width="255" height="92" rx="10" fill="none" stroke="#0c8599" stroke-width="2"/>
+<rect x="1540" y="50" width="260" height="125" rx="10" fill="none" stroke="#0c8599" stroke-width="2" stroke-dasharray="8 6"/>
+<polyline points="1535,112 1465,112" fill="none" stroke="#0c8599" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#ah)"/>
+<polyline points="365,105 555,105" fill="none" stroke="#0c8599" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="300" width="1400" height="660" rx="10" fill="none" stroke="#343a40" stroke-width="2"/>
+<polyline points="600,195 220,195 220,400" fill="none" stroke="#0c8599" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="80" y="400" width="400" height="165" rx="10" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+<polyline points="470,400 470,250 870,250 870,195" fill="none" stroke="#868e96" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#ah)"/>
+<rect x="80" y="610" width="400" height="90" rx="10" fill="#f8f0fc" stroke="#6741d9" stroke-width="2"/>
+<polyline points="280,568 280,606" fill="none" stroke="#6741d9" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="80" y="745" width="400" height="165" rx="10" fill="#d0bfff" stroke="#6741d9" stroke-width="2"/>
+<polyline points="280,703 280,741" fill="none" stroke="#6741d9" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="560" y="395" width="640" height="520" rx="10" fill="none" stroke="#6741d9" stroke-width="2" stroke-dasharray="8 6"/>
+<polyline points="484,760 554,760" fill="none" stroke="#6741d9" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#ah)"/>
+<rect x="580" y="455" width="200" height="72" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="980" y="455" width="200" height="72" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<polyline points="785,491 975,491" fill="none" stroke="#495057" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="580" y="600" width="200" height="72" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="980" y="600" width="200" height="72" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<polyline points="785,636 975,636" fill="none" stroke="#495057" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="580" y="790" width="200" height="72" rx="10" fill="#f1f3f5" stroke="#495057" stroke-width="2"/>
+<rect x="1540" y="790" width="230" height="72" rx="10" fill="#ffd8a8" stroke="#e8590c" stroke-width="2"/>
+<polyline points="785,826 1535,826" fill="none" stroke="#e8590c" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="1010" width="320" height="110" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="400" y="1010" width="320" height="110" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="760" y="1010" width="320" height="110" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<rect x="1120" y="1010" width="320" height="110" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+<text x="40" y="-60" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="bold" fill="#1e1e1e" text-anchor="start">Riptides capability demo — what sits where</text>
+<text x="40" y="-33" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#495057" text-anchor="start">Grey boxes are unmodified upstream images: they speak plaintext and hold no keys, certs or tokens.</text>
+<text x="200" y="50" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#495057" text-anchor="middle">Your Mac</text>
+<text x="62" y="82" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start">riptides-cli ctl apply</text>
+<text x="62" y="100" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start">  authors every policy</text>
+<text x="62" y="117" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start"></text>
+<text x="62" y="134" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start">limactl shell</text>
+<text x="62" y="152" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start">  runs the evidence</text>
+<text x="62" y="170" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start">  commands</text>
+<text x="1010" y="50" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#0c8599" text-anchor="middle">Control plane   &lt;env&gt;.console.riptid.es</text>
+<text x="720" y="120" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#0c8599" text-anchor="middle">WorkloadIdentity ×5</text>
+<text x="720" y="139" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#0c8599" text-anchor="middle">Service ×3</text>
+<text x="1018" y="120" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#0c8599" text-anchor="middle">Secret · CredentialSource</text>
+<text x="1018" y="139" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#0c8599" text-anchor="middle">CredentialBinding</text>
+<text x="1308" y="120" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#0c8599" text-anchor="middle">CA · signer</text>
+<text x="1308" y="139" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#0c8599" text-anchor="middle">trust bundle</text>
+<text x="1670" y="91" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" fill="#0c8599" text-anchor="middle">External upstream CA</text>
+<text x="1670" y="109" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" fill="#0c8599" text-anchor="middle">optional — signs the control</text>
+<text x="1670" y="126" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" fill="#0c8599" text-anchor="middle">plane&#x27;s own CA certificate</text>
+<text x="1670" y="144" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" fill="#0c8599" text-anchor="middle">instead of it self-signing</text>
+<text x="400" y="87" font-family="Menlo, monospace" font-size="15" font-weight="normal" fill="#0c8599" text-anchor="start">CRDs</text>
+<text x="740" y="330" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#343a40" text-anchor="middle"></text>
+<text x="68" y="344" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="bold" fill="#1e1e1e" text-anchor="start">Lima VM — a joined node</text>
+<text x="68" y="366" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#868e96" text-anchor="start">installed with the docs one-liner</text>
+<text x="68" y="384" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#868e96" text-anchor="start">joined with a JoinToken</text>
+<text x="250" y="218" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#0c8599" text-anchor="start">gRPC streams</text>
+<text x="250" y="234" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#0c8599" text-anchor="start">identities · credentials · trust bundles</text>
+<text x="280" y="430" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1971c2" text-anchor="middle">riptides daemon</text>
+<text x="102" y="466" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#1864ab" text-anchor="start">resolves identity from process</text>
+<text x="102" y="484" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#1864ab" text-anchor="start">metadata · signs CSRs</text>
+<text x="102" y="501" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#1864ab" text-anchor="start">evaluates policy · telemetry</text>
+<text x="890" y="227" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#868e96" text-anchor="start">OTLP spans</text>
+<text x="280" y="650" font-family="Menlo, monospace" font-size="17" font-weight="normal" fill="#6741d9" text-anchor="middle">/dev/riptides</text>
+<text x="280" y="672" font-family="Menlo, monospace" font-size="17" font-weight="normal" fill="#6741d9" text-anchor="middle">EVAL · EVAL_TRAFFIC · CSR_SIGN</text>
+<text x="280" y="775" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#6741d9" text-anchor="middle">riptides.ko</text>
+<text x="102" y="810" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#5f3dc4" text-anchor="start">hooks connect/accept/sendmsg/recvmsg</text>
+<text x="102" y="826" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#5f3dc4" text-anchor="start">terminates mTLS in-kernel</text>
+<text x="102" y="842" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#5f3dc4" text-anchor="start">(BearSSL, kTLS when available)</text>
+<text x="102" y="859" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#5f3dc4" text-anchor="start">MDX identity exchange · injection</text>
+<text x="880" y="662" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#6741d9" text-anchor="middle"></text>
+<text x="578" y="421" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#6741d9" text-anchor="start">every socket in here is hooked by riptides.ko</text>
+<text x="680" y="497" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="normal" fill="#495057" text-anchor="middle">nginx</text>
+<text x="1080" y="497" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="normal" fill="#495057" text-anchor="middle">go-httpbin</text>
+<text x="800" y="468" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#495057" text-anchor="start">plain HTTP :8080</text>
+<text x="800" y="513" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#1971c2" text-anchor="start">→ mTLS, in the kernel</text>
+<text x="680" y="642" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="normal" fill="#495057" text-anchor="middle">redis-cli</text>
+<text x="1080" y="642" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="normal" fill="#495057" text-anchor="middle">redis</text>
+<text x="808" y="613" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#495057" text-anchor="start">RESP :6379</text>
+<text x="800" y="658" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#1971c2" text-anchor="start">→ mTLS, same mechanism</text>
+<text x="580" y="699" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#2f9e44" text-anchor="start">not HTTP — in act 2 redis&#x27; own TLS stays off (tls-port 0)</text>
+<text x="580" y="723" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#6741d9" text-anchor="start">act 2b — switch it on and riptides negotiates riptides/passthrough:</text>
+<text x="580" y="743" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#6741d9" text-anchor="start">it authenticates both ends, then hands the socket back undecrypted</text>
+<text x="680" y="832" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="normal" fill="#495057" text-anchor="middle">curl</text>
+<text x="580" y="885" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#495057" text-anchor="start">holds no token, in env or image</text>
+<text x="1655" y="832" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="normal" fill="#e8590c" text-anchor="middle">api.github.com</text>
+<text x="830" y="793" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#e8590c" text-anchor="start">HTTPS :443 — intercepted, then re-encrypted</text>
+<text x="830" y="851" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#e8590c" text-anchor="start">Authorization: Bearer &lt;PAT&gt;  added in-kernel</text>
+<text x="200" y="1052" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#2f9e44" text-anchor="middle">Act 1 — augmentation</text>
+<text x="200" y="1070" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#2f9e44" text-anchor="middle">process labels become</text>
+<text x="200" y="1089" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#2f9e44" text-anchor="middle">a SPIFFE identity</text>
+<text x="560" y="1052" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#2f9e44" text-anchor="middle">Act 2 — mTLS</text>
+<text x="560" y="1070" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#2f9e44" text-anchor="middle">both legs, no app change,</text>
+<text x="560" y="1089" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#2f9e44" text-anchor="middle">revocation is a policy edit</text>
+<text x="920" y="1052" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#2f9e44" text-anchor="middle">Act 2b — passthrough</text>
+<text x="920" y="1070" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#2f9e44" text-anchor="middle">their TLS kept, our identity</text>
+<text x="920" y="1089" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#2f9e44" text-anchor="middle">added underneath it</text>
+<text x="1280" y="1052" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#2f9e44" text-anchor="middle">Act 3 — credential injection</text>
+<text x="1280" y="1070" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#2f9e44" text-anchor="middle">the secret is added on the wire,</text>
+<text x="1280" y="1089" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#2f9e44" text-anchor="middle">never reaching the workload</text>
+</svg>

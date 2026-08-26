@@ -1,0 +1,76 @@
+# Unmodified upstream images, host networking, plaintext everywhere.
+#
+# Nothing here knows about riptides: no TLS config, no certificates, no tokens.
+# Every security property the demo shows is added by the kernel module.
+#
+# Host networking is deliberate — it is the mode the driver's own test suite and
+# the wordpress example use, so process/port selectors and localhost service
+# addresses are the known-good path.
+name: riptides-demo
+
+services:
+  # ── the HTTP leg: nginx :8000 ──proxy──> httpbin :8080 ────────────────────
+  nginx:
+    image: nginx:1-alpine
+    container_name: demo-nginx
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+  httpbin:
+    # No "v" prefix on these tags, and no v2 alias — 2.25 is the minor stream.
+    image: mccutchen/go-httpbin:2.25
+    container_name: demo-httpbin
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: "8080"
+
+  # ── the not-HTTP leg: redis-cli ──RESP──> redis :6379 ─────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: demo-redis
+    network_mode: host
+    restart: unless-stopped
+
+  # Reconnects every two seconds, so a policy change shows up in `docker logs`
+  # within one loop instead of waiting for a long-lived connection to drop.
+  redis-cli:
+    image: redis:7-alpine
+    container_name: demo-redis-cli
+    network_mode: host
+    restart: unless-stopped
+    # No depends_on: nerdctl compose ignores it, and the loop retries anyway.
+    entrypoint: ["sh", "/loop.sh"]
+    environment:
+      # Seconds between iterations. Each opens two connections (a set and a
+      # get), so this sets the demo's idle connection rate. Lower it for a
+      # snappier revocation demo, raise it to keep the console quieter.
+      INTERVAL: "4"
+    volumes:
+      - ./redis-loop.sh:/loop.sh:ro
+
+  # ── the egress client, and the unidentified "rogue" in act 2 ──────────────
+  client:
+    image: curlimages/curl:latest
+    container_name: demo-client
+    network_mode: host
+    restart: unless-stopped
+    entrypoint: ["sh", "-c"]
+    command: ["sleep infinity"]
+    environment:
+      # CURL_CA_BUNDLE is the one that matters. This curl verifies against the
+      # hashed CApath directory (/etc/ssl/certs/*.0), whose symlinks point at the
+      # image's original certs — so simply replacing ca-certificates.crt is not
+      # enough, and the intercepted TLS fails with "unable to get local issuer
+      # certificate". Forcing a CAfile makes it read the mounted bundle.
+      CURL_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
+    volumes:
+      # The driver's CA bundle (system CAs + the riptides interception CA),
+      # copied out of /sys/module/riptides/certs by lib/preflight.sh. Without it
+      # the client rejects the intercepted TLS in act 3. riptides rewrites the
+      # host's own trust store in place; containers need their own copy.
+      - ./.ca/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro

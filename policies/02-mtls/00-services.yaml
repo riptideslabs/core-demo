@@ -1,0 +1,34 @@
+# The two internal destinations, as services.
+#
+# Process-to-process mTLS does not strictly need these — the driver's own
+# directory-list-app-mtls fixture has identities and nothing else. They are here
+# because they give the flows a name in the console's service inventory, and
+# because act 3 needs a Service anyway (injection selectors match service
+# labels, not names).
+apiVersion: core.riptides.io/v1alpha1
+kind: Service
+metadata:
+  name: demo-httpbin
+  namespace: riptides-system
+spec:
+  labels:
+    app: demo-httpbin
+  addresses:
+    - address: localhost
+      port: 8080
+    - address: 127.0.0.1
+      port: 8080
+---
+apiVersion: core.riptides.io/v1alpha1
+kind: Service
+metadata:
+  name: demo-redis
+  namespace: riptides-system
+spec:
+  labels:
+    app: demo-redis
+  addresses:
+    - address: localhost
+      port: 6379
+    - address: 127.0.0.1
+      port: 6379

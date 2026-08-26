@@ -1,0 +1,24 @@
+# Same identity as 12-wid-redis.yaml with one thing changed: redis-cli is no
+# longer on the inbound allow-list. Applied on demand by act 2; reverting is
+# re-applying 12-wid-redis.yaml.
+#
+# Not picked up by apply_dir() — the -deny.yaml suffix excludes it.
+apiVersion: core.riptides.io/v1alpha1
+kind: WorkloadIdentity
+metadata:
+  name: demo-cache-redis
+  namespace: riptides-system
+spec:
+  workloadID: demo/cache/redis
+  scope:
+    daemon:
+      id: ${DAEMON_WORKLOAD_ID}
+  selectors:
+    - "process:name": redis-server
+      "process:binary:path": /usr/local/bin/redis-server
+  connection:
+    tls:
+      mode: MUTUAL
+  allowedSPIFFEIDs:
+    inbound:
+      - spiffe://${TRUST_DOMAIN}/demo/cache/nobody

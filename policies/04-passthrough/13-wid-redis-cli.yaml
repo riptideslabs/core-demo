@@ -1,0 +1,21 @@
+# Unchanged from 02-mtls/13-wid-redis-cli.yaml. Repeated here so this act can be
+# applied and deleted as a set.
+apiVersion: core.riptides.io/v1alpha1
+kind: WorkloadIdentity
+metadata:
+  name: demo-cache-redis-cli
+  namespace: riptides-system
+spec:
+  workloadID: demo/cache/redis-cli
+  scope:
+    daemon:
+      id: ${DAEMON_WORKLOAD_ID}
+  selectors:
+    - "process:name": redis-cli
+      "destination:port": 6379
+  connection:
+    tls:
+      mode: MUTUAL
+  allowedSPIFFEIDs:
+    outbound:
+      - spiffe://${TRUST_DOMAIN}/demo/cache/redis

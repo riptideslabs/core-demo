@@ -1,0 +1,26 @@
+# The probe (app/redis-probe.py) needs its own identity, or redis refuses the
+# connection before the probe can read the sockopt. It doubles as a worked
+# example of authorizing a second client for the same server.
+#
+# process:name python3 is a broad selector — acceptable on a demo VM where the
+# probe is the only Python talking to :6379, but it is not something to copy into
+# a real policy. destination:port keeps it off every other Python socket.
+apiVersion: core.riptides.io/v1alpha1
+kind: WorkloadIdentity
+metadata:
+  name: demo-cache-probe
+  namespace: riptides-system
+spec:
+  workloadID: demo/cache/probe
+  scope:
+    daemon:
+      id: ${DAEMON_WORKLOAD_ID}
+  selectors:
+    - "process:name": python3
+      "destination:port": 6379
+  connection:
+    tls:
+      mode: MUTUAL
+  allowedSPIFFEIDs:
+    outbound:
+      - spiffe://${TRUST_DOMAIN}/demo/cache/redis

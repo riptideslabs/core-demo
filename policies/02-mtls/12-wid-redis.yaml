@@ -1,0 +1,22 @@
+# The not-HTTP leg's server. Redis speaks RESP, not HTTP — the same MUTUAL
+# setting applies, which is the point: this is a socket-level mechanism, not an
+# HTTP proxy. Redis's own TLS support stays switched off (tls-port 0).
+apiVersion: core.riptides.io/v1alpha1
+kind: WorkloadIdentity
+metadata:
+  name: demo-cache-redis
+  namespace: riptides-system
+spec:
+  workloadID: demo/cache/redis
+  scope:
+    daemon:
+      id: ${DAEMON_WORKLOAD_ID}
+  selectors:
+    - "process:name": redis-server
+      "process:binary:path": /usr/local/bin/redis-server
+  connection:
+    tls:
+      mode: MUTUAL
+  allowedSPIFFEIDs:
+    inbound:
+      - spiffe://${TRUST_DOMAIN}/demo/cache/redis-cli

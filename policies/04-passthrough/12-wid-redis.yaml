@@ -1,0 +1,32 @@
+# Same identity as 02-mtls/12-wid-redis.yaml, with one addition: the probe is
+# also on the inbound allow-list.
+#
+# Nothing here says "passthrough". There is no such policy field — the proto
+# carries CommandEvalAnswer.passthrough but the daemon hardcodes it to false and
+# the setter is commented out. The driver reaches passthrough by detection: the
+# client's first sendmsg carries a TLS ClientHello, no policy asked for
+# interception, so it offers ALPN riptides/passthrough and, once that is
+# negotiated, restores the original sendmsg/recvmsg.
+#
+# That is the point of reusing this manifest almost verbatim: the policy is the
+# same as the plaintext act, and riptides works out the rest.
+apiVersion: core.riptides.io/v1alpha1
+kind: WorkloadIdentity
+metadata:
+  name: demo-cache-redis
+  namespace: riptides-system
+spec:
+  workloadID: demo/cache/redis
+  scope:
+    daemon:
+      id: ${DAEMON_WORKLOAD_ID}
+  selectors:
+    - "process:name": redis-server
+      "process:binary:path": /usr/local/bin/redis-server
+  connection:
+    tls:
+      mode: MUTUAL
+  allowedSPIFFEIDs:
+    inbound:
+      - spiffe://${TRUST_DOMAIN}/demo/cache/redis-cli
+      - spiffe://${TRUST_DOMAIN}/demo/cache/probe

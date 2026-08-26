@@ -1,0 +1,45 @@
+# Override that makes Redis do its own TLS, so riptides has an already-encrypted
+# flow to pass through:
+#
+#   $RT compose -f app/compose.yaml -f app/compose.passthrough.yaml up -d
+#
+# Deliberately still port 6379 — Redis serves TLS on the same port the plaintext
+# leg used (`--port 0` closes the plaintext one). That means the act-2
+# WorkloadIdentity selectors and Services need no change at all: same processes,
+# same port, same policy, and riptides switches from terminating mTLS to
+# authenticating-then-stepping-aside on its own.
+#
+# Lists are written out in full rather than relying on compose merge semantics,
+# which differ between docker compose and nerdctl compose.
+name: riptides-demo
+
+services:
+  redis:
+    command:
+      - redis-server
+      - --port
+      - "0"
+      - --tls-port
+      - "6379"
+      - --tls-cert-file
+      - /certs/redis.crt
+      - --tls-key-file
+      - /certs/redis.key
+      - --tls-ca-cert-file
+      - /certs/ca.crt
+      # One-way TLS: Redis proves who it is, clients are not asked for a cert.
+      # Riptides supplies the mutual half underneath, without decrypting.
+      - --tls-auth-clients
+      - "no"
+    volumes:
+      - ./.certs:/certs:ro
+
+  redis-cli:
+    environment:
+      INTERVAL: "4"
+      # redis-loop.sh passes these to every redis-cli invocation. Verification is
+      # real: the cert carries an IP SAN for 127.0.0.1, so no --insecure.
+      REDIS_TLS_ARGS: "--tls --cacert /certs/ca.crt"
+    volumes:
+      - ./redis-loop.sh:/loop.sh:ro
+      - ./.certs:/certs:ro

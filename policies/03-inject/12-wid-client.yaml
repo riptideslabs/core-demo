@@ -1,0 +1,33 @@
+# The egress client's identity.
+#
+# tls.intercept on the egress rule is the load-bearing bit: the connection is
+# already TLS (curl -> api.github.com:443), so the driver stands up two BearSSL
+# engines — a mock server toward curl and a real client toward GitHub — decrypts,
+# injects the header, and re-encrypts. That is why the client has to trust the
+# interception CA (see app/compose.yaml).
+#
+# The egress workloadID deliberately matches the top-level one, so the
+# CredentialBinding's workloadID resolves either way it is read.
+#
+# destination:port 443 keeps this identity off the act 2 legs: the same curl
+# binary hitting :8080 or :6379 still matches nothing and stays unidentified.
+apiVersion: core.riptides.io/v1alpha1
+kind: WorkloadIdentity
+metadata:
+  name: demo-client-curl
+  namespace: riptides-system
+spec:
+  workloadID: demo/client/curl
+  scope:
+    daemon:
+      id: ${DAEMON_WORKLOAD_ID}
+  selectors:
+    - "process:name": curl
+      "destination:port": 443
+  egress:
+    - selectors:
+        - app: github-api
+      workloadID: demo/client/curl
+      connection:
+        tls:
+          intercept: true

@@ -1,0 +1,22 @@
+# The HTTP leg's server. Requires mTLS, and accepts nginx only.
+#
+# No destination:port on a server identity — the accepting side is matched by
+# process, the same way the driver's directory-list-app-mtls fixture does it.
+apiVersion: core.riptides.io/v1alpha1
+kind: WorkloadIdentity
+metadata:
+  name: demo-api-httpbin
+  namespace: riptides-system
+spec:
+  workloadID: demo/api/httpbin
+  scope:
+    daemon:
+      id: ${DAEMON_WORKLOAD_ID}
+  selectors:
+    - "process:name": go-httpbin
+  connection:
+    tls:
+      mode: MUTUAL
+  allowedSPIFFEIDs:
+    inbound:
+      - spiffe://${TRUST_DOMAIN}/demo/web/nginx

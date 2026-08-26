@@ -1,0 +1,21 @@
+# The HTTP leg's client. nginx keeps proxying plain HTTP to 127.0.0.1:8080;
+# the kernel turns that hop into mTLS and will only complete it against httpbin.
+apiVersion: core.riptides.io/v1alpha1
+kind: WorkloadIdentity
+metadata:
+  name: demo-web-nginx
+  namespace: riptides-system
+spec:
+  workloadID: demo/web/nginx
+  scope:
+    daemon:
+      id: ${DAEMON_WORKLOAD_ID}
+  selectors:
+    - "process:name": nginx
+      "destination:port": 8080
+  connection:
+    tls:
+      mode: MUTUAL
+  allowedSPIFFEIDs:
+    outbound:
+      - spiffe://${TRUST_DOMAIN}/demo/api/httpbin
