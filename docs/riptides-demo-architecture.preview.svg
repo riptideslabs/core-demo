@@ -34,14 +34,14 @@
 <rect x="1120" y="1010" width="320" height="110" rx="10" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
 <text x="40" y="-60" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="bold" fill="#1e1e1e" text-anchor="start">Riptides capability demo — what sits where</text>
 <text x="40" y="-33" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#495057" text-anchor="start">Grey boxes are unmodified upstream images: they speak plaintext and hold no keys, certs or tokens.</text>
-<text x="200" y="50" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#495057" text-anchor="middle">Your Mac</text>
+<text x="200" y="50" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#495057" text-anchor="middle">Your laptop</text>
 <text x="62" y="82" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start">riptides-cli ctl apply</text>
 <text x="62" y="100" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start">  authors every policy</text>
 <text x="62" y="117" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start"></text>
-<text x="62" y="134" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start">limactl shell</text>
+<text x="62" y="134" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start">ssh</text>
 <text x="62" y="152" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start">  runs the evidence</text>
 <text x="62" y="170" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#495057" text-anchor="start">  commands</text>
-<text x="1010" y="50" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#0c8599" text-anchor="middle">Control plane   &lt;env&gt;.console.riptid.es</text>
+<text x="1010" y="50" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#0c8599" text-anchor="middle">Control plane   &lt;env&gt;.console.riptides.io</text>
 <text x="720" y="120" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#0c8599" text-anchor="middle">WorkloadIdentity ×5</text>
 <text x="720" y="139" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#0c8599" text-anchor="middle">Service ×3</text>
 <text x="1018" y="120" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" fill="#0c8599" text-anchor="middle">Secret · CredentialSource</text>
@@ -54,9 +54,9 @@
 <text x="1670" y="144" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" fill="#0c8599" text-anchor="middle">instead of it self-signing</text>
 <text x="400" y="87" font-family="Menlo, monospace" font-size="15" font-weight="normal" fill="#0c8599" text-anchor="start">CRDs</text>
 <text x="740" y="330" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#343a40" text-anchor="middle"></text>
-<text x="68" y="344" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="bold" fill="#1e1e1e" text-anchor="start">Lima VM — a joined node</text>
-<text x="68" y="366" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#868e96" text-anchor="start">installed with the docs one-liner</text>
-<text x="68" y="384" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#868e96" text-anchor="start">joined with a JoinToken</text>
+<text x="68" y="344" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="bold" fill="#1e1e1e" text-anchor="start">The node — joined to the control plane</text>
+<text x="68" y="366" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#868e96" text-anchor="start">a Lima VM, or any Linux box over ssh</text>
+<text x="68" y="384" font-family="Menlo, monospace" font-size="14" font-weight="normal" fill="#868e96" text-anchor="start">joined with the docs one-liner</text>
 <text x="250" y="218" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#0c8599" text-anchor="start">gRPC streams</text>
 <text x="250" y="234" font-family="Menlo, monospace" font-size="13" font-weight="normal" fill="#0c8599" text-anchor="start">identities · credentials · trust bundles</text>
 <text x="280" y="430" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" fill="#1971c2" text-anchor="middle">riptides daemon</text>

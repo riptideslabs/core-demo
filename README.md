@@ -303,7 +303,8 @@ saying out loud — it is the one part of the demo that touches the workload.
 
 ![Riptides capability demo — what sits where](docs/riptides-demo-architecture.preview.png)
 
-What sits where, from the platform's point of view: the control plane and the
+What sits where, from the platform's point of view — your laptop drives it,
+the node runs it: the control plane and the
 CRDs, the daemon and the module either side of `/dev/riptides`, the five
 workloads inside the hooked region, and the one arrow that leaves the node.
 
