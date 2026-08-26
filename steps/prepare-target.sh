@@ -88,5 +88,6 @@ fi
 step "Where that leaves the box"
 runsh "DEMO_TARGET='$DEMO_TARGET' SSH_DEST='${SSH_DEST:-}' bash '$DEMO_DIR/lib/preflight.sh' 2>&1 | tail -12 || true"
 note "riptides itself is not installed by this script — see the README for the"
-note "one-liner (on EC2, --awsiid joins on instance identity, no join token)."
+note "one-liner. A join token works anywhere; on EC2 --awsiid joins on instance"
+  note "identity instead, but only once an AWSIID verifier exists in the console."
 printf '\n'

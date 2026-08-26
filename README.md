@@ -27,17 +27,28 @@ Policy is authored the way a customer authors it: CRDs applied with
 `riptides-cli ctl` against a real control plane. Nothing here uses a
 developer-only shortcut, so what you demo is what ships.
 
-## 1. Get a control plane
+## 1. Get a control plane and the CLI
 
-Sign up at **<https://console.riptides.io>** for a free account. You get a
-control plane URL and a trust domain of your own — everything below points at it,
-and the demo reads both off the live environment rather than hardcoding them.
+Sign up at **<https://console.riptides.io>** for a free account. You get a control
+plane URL and a trust domain of your own — everything below points at it, and the
+demo reads both off the live environment rather than hardcoding them.
 
-Then install the CLI and authenticate:
+**Install `riptides-cli`.** The demo drives every policy change through it, so it
+is a hard prerequisite and `make check` fails without it:
 
 ```bash
-brew install --cask riptides-cli        # or grab a .deb/.rpm/tarball from the releases page
+# macOS
+brew install --cask riptides-cli        # tap: riptides-packages/homebrew-tap
+
+# Linux — .deb, .rpm and tarballs are on the releases page
+# https://github.com/riptides-packages/daemon/releases
+```
+
+Then authenticate it against your control plane (this opens a browser for OIDC):
+
+```bash
 riptides-cli context add --url https://<your-env>.console.riptides.io
+riptides-cli context status                 # confirm
 ```
 
 Docs, including the rest of the getting-started path:
@@ -53,18 +64,31 @@ that and never installs it. Either target works, and both are verified:
 | A local **Lima** VM | `lima` (default) | The demo directory is a shared mount, so nothing is copied. |
 | **Any joined Linux box** — EC2, bare metal, a VM elsewhere | `ssh` | The demo is copied to the box. Verified on Amazon Linux 2023. |
 
-Joining is the documented one-liner. On EC2 use `--awsiid` and there is no join
-token to mint — the node authenticates with its instance identity:
+Joining is the documented one-liner, and how the node proves who it is depends on
+what you have set up in the console first.
+
+**A join token works anywhere, including EC2.** Create a JoinToken `Verifier` and
+a `JoinToken` (console, or `riptides-cli ctl apply`), then:
 
 ```bash
-# EC2 / Amazon Linux
+curl -fsSL https://docs.riptides.io/install.sh | sudo bash -s -- \
+  --controlplane-url https://<your-env>.console.riptides.io \
+  --join-token       "<token>"
+```
+
+**On EC2 you can instead use instance identity**, which avoids handling a token
+at all — the node authenticates with its AWS Instance Identity Document:
+
+```bash
 curl -fsSL https://docs.riptides.io/install.sh | sudo bash -s -- \
   --controlplane-url https://<your-env>.console.riptides.io --awsiid
-
-# anywhere else
-curl -fsSL https://docs.riptides.io/install.sh | sudo bash -s -- \
-  --controlplane-url https://<your-env>.console.riptides.io --join-token "<token>"
 ```
+
+That is **not** available out of the box: configure an **AWSIID verifier in the
+console first** (Verifiers), or the join is rejected. Such a verifier also
+requires `required_metadata` — the control plane enforces it — which is what
+scopes *which* instances may join, by account, region and so on. Set that up
+before running the installer, otherwise use the join token above.
 
 ## 3. Point the demo at it
 
