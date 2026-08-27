@@ -2,7 +2,8 @@
 
 **Riptides gives plain TCP sockets a cryptographic identity and mutual TLS with no changes to the application** - no sidecar, no SDK, no certificates in your code. Interception happens in a Linux kernel module, so workloads are not modified, relinked or reconfigured. On top of that, Riptides can inject credentials into outbound requests and enforce policy on the traffic it sees.
 
-This repository demonstrates that on one Linux box, in four short acts, using
+This repository demonstrates that on a single Linux machine - a local VM or a
+cloud instance, whichever you have - in four short acts, using
 five **unmodified upstream containers** — nginx, go-httpbin, redis, redis-cli and curl. They
 speak plaintext and hold no keys, certificates or tokens; everything the demo
 shows is added underneath them. Each act pauses between steps so you can talk
@@ -54,14 +55,14 @@ Docs, including the rest of the getting-started path:
 
 ## 2. Get a node, and join it
 
-The demo needs one Linux box with riptides installed and joined. It **checks**
+The demo needs one Linux machine with riptides installed and joined. It **checks**
 that and never installs it. Either target works, and both are verified:
 
 
 | Target                                                     | `DEMO_TARGET`    | Notes                                                         |
 | ---------------------------------------------------------- | ---------------- | ------------------------------------------------------------- |
 | A local **Lima** VM                                        | `lima` (default) | The demo directory is a shared mount, so nothing is copied.   |
-| **Any joined Linux box** — EC2, bare metal, a VM elsewhere | `ssh`            | The demo is copied to the box. Verified on Amazon Linux 2023. |
+| **Any joined Linux machine** — EC2, bare metal, a VM elsewhere | `ssh`            | The demo is copied to the machine. Verified on Amazon Linux 2023. |
 
 
 Joining is the documented one-liner, and how the node proves who it is depends on
@@ -129,7 +130,7 @@ Everything is driven **from your laptop**: policy applies run there with
 the wire runs on the target over ssh (the `[vm] $` lines). Lima is reached with
 the ssh config it generates itself, so there is one transport for both targets.
 
-For a remote box, set this in `.env` (see `.env.example`):
+For a remote machine, set this in `.env` (see `.env.example`):
 
 ```bash
 DEMO_TARGET=ssh
@@ -140,7 +141,7 @@ SSH_KEY=~/.ssh/demo.pem          # if not already in your agent or ssh config
 Your `.env` — including the GitHub PAT — is **never copied to the target**:
 policy templating happens on your laptop, so the token has no reason to leave it.
 
-### What the box needs
+### What the machine needs
 
 - **required** — `sudo` (passwordless), `curl`, `jq`, `pgrep`, `timeout`, and a
 container runtime with compose support. `make check` names anything missing,
@@ -151,7 +152,7 @@ not packaged — Amazon Linux 2023 has it in neither its repos nor EPEL.
 
 `make prepare-target` installs what is missing, including the docker compose
 plugin (Amazon Linux ships docker without it, and has no nerdctl). It is a
-separate command on purpose, because it changes the box:
+separate command on purpose, because it changes the machine:
 
 ```bash
 make prepare-target
@@ -207,7 +208,7 @@ mentions TLS, certificates or tokens.
 
 ## Act 1 — augmentation
 
-*No policy applied yet.* Following commands are run in the box.
+*No policy applied yet.* The commands below run on the machine, not on your laptop.
 
 `sudo riptides daemon augment <pid>` prints every label the daemon collected for a
 process. Those labels are the entire input to identity — the selectors in acts 2
@@ -229,9 +230,13 @@ What to show, in order:
 
 1. `tcpdump` **on `lo`, before.** `GET /get HTTP/1.1` on :8080 and
   `*3 $3 set $7 demo:ts` on :6379, in the clear.
-2. **The payload count, before and after - the same command verbatim.**
-  This is the strongest proof in the demo, because it is a count rather than a
-   picture. Measured on a live run:
+2. **Search the wire for the payload itself, before and after.** The demo runs
+   the same search both times: it captures every packet on the port and counts
+   how many contain the text the application sent - `GET /get` on the HTTP leg,
+   `demo:ts` on the Redis leg. Before, most packets contain it. After, none do,
+   while the packet count stays the same, so "we found nothing" cannot be
+   explained away as "there was no traffic". This is the strongest proof in the
+   demo, because it is a count rather than a picture. Measured on a live run:
 
   |                                      | before  | after       |
   | ------------------------------------ | ------- | ----------- |
@@ -270,14 +275,11 @@ Answers the standard objection, "we already do our own TLS". Redis is
 reconfigured to serve TLS itself on the *same* port 6379 (`--port 0 --tls-port 6379`), so the WorkloadIdentity CRDs and Services are unchanged —
 only the application differs, and riptides changes behaviour on its own.
 
-**It is automatic; there is no passthrough policy field.** The proto carries
-`CommandEvalAnswer.passthrough`, but the daemon hardcodes it to `false` and the
-setter is commented out, so the only route in is detection:
-`needs_intercept()` is false (nothing asked for interception) while the client's
-first `sendmsg` carries a ClientHello, so the driver offers ALPN
-`riptides/passthrough`, and on negotiating it **restores the original
-`sendmsg`/`recvmsg`** — handshake and identity, then it steps out of the data
-path entirely.
+**It is automatic - there is nothing to configure.** Riptides notices that the
+application is already starting its own TLS handshake, and that no policy asked
+it to look inside the traffic. So it authenticates both ends, proves who they
+are, and then steps out of the data path: the application's own encryption is
+carried through untouched.
 
 **Certificates are not automatic.** Redis needs `tls-port`, `tls-cert-file` and
 `tls-key-file`, and riptides cannot supply them: credential propagation delivers
@@ -291,9 +293,10 @@ What to show:
 1. **Before the policy**, `app/redis-probe.py` reports `riptides: not managing
   this connection`. The traffic is encrypted - by the application - and utterly
    anonymous. Nothing can be authorized because nobody knows who either end is.
-2. **After**, the same probe prints `negotiated ALPN: riptides/passthrough` with
-  both SPIFFE IDs. This is the driver's own `getsockopt(SOL_RIPTIDES,  RIPTIDES_TLS_INFO)` - the kernel answering the application directly, not an
-   inference from a capture. `driver/test/passthrough.py` asserts the same value.
+2. **After**, the same probe prints `negotiated ALPN: riptides/passthrough` along
+   with both SPIFFE IDs. The application is asking the kernel directly about its
+   own connection, so this is the kernel's own answer rather than something
+   inferred from a packet capture.
 3. **On the wire**, the count finds `riptides/passthrough` in the ClientHello, in
   the clear. On the plaintext leg it reads just `riptides`.
 4. **Revocation still bites.** Dropping redis-cli from the allow-list resets the
