@@ -1,13 +1,9 @@
 # Riptides core capability demo
 
-**Riptides gives plain TCP sockets a cryptographic identity and mutual TLS with
-no changes to the application** — no sidecar, no SDK, no certificates in your
-code. Interception happens in a Linux kernel module, so workloads are not
-modified, relinked or reconfigured, and it can also inject credentials into
-outbound requests and enforce policy on the traffic it sees.
+**Riptides gives plain TCP sockets a cryptographic identity and mutual TLS with no changes to the application** - no sidecar, no SDK, no certificates in your code. Interception happens in a Linux kernel module, so workloads are not modified, relinked or reconfigured. On top of that, Riptides can inject credentials into outbound requests and enforce policy on the traffic it sees.
 
 This repository demonstrates that on one Linux box, in four short acts, using
-five **unmodified upstream containers** — nginx, go-httpbin, redis and curl. They
+five **unmodified upstream containers** — nginx, go-httpbin, redis, redis-cli and curl. They
 speak plaintext and hold no keys, certificates or tokens; everything the demo
 shows is added underneath them. Each act pauses between steps so you can talk
 over it, and prints the evidence for what it claims — packet captures, the
@@ -16,12 +12,14 @@ kernel's own connection table, and what the application itself sent.
 Expect about fifteen minutes end to end once you have a control plane and a
 joined node.
 
-| Act | Shows | Runs |
-|---|---|---|
-| 1 | **Augmentation** — identity derived from a running process, before any policy exists | `make act1` |
-| 2 | **mTLS between internal services** — one HTTP leg, one Redis leg, neither app touched | `make act2` |
-| 2b | **Passthrough** — the app brings its own TLS; riptides authenticates it and steps out of the data path | `make act2-passthrough` |
-| 3 | **Secret injection on egress** — a GitHub PAT the workload never holds | `make act3` |
+
+| Act | Shows                                                                                                  | Runs                    |
+| --- | ------------------------------------------------------------------------------------------------------ | ----------------------- |
+| 1   | **Augmentation** — identity derived from a running process, before any policy exists                   | `make act1`             |
+| 2   | **mTLS between internal services** — one HTTP leg, one Redis leg, neither app touched                  | `make act2`             |
+| 2b  | **Passthrough** — the app brings its own TLS; riptides authenticates it and steps out of the data path | `make act2-passthrough` |
+| 3   | **Secret injection on egress** — a GitHub PAT the workload never holds                                 | `make act3`             |
+
 
 Policy is authored the way a customer authors it: CRDs applied with
 `riptides-cli ctl` against a real control plane. Nothing here uses a
@@ -29,11 +27,11 @@ developer-only shortcut, so what you demo is what ships.
 
 ## 1. Get a control plane and the CLI
 
-Sign up at **<https://console.riptides.io>** for a free account. You get a control
-plane URL and a trust domain of your own — everything below points at it, and the
+Sign up at **[https://console.riptides.io](https://console.riptides.io)** for a free account. You get a control
+plane URL and a trust domain of your own — everything below points at them, and the
 demo reads both off the live environment rather than hardcoding them.
 
-**Install `riptides-cli`.** The demo drives every policy change through it, so it
+**Install** `riptides-cli`**.** The demo drives every policy change through it, so it
 is a hard prerequisite and `make check` fails without it:
 
 ```bash
@@ -52,23 +50,55 @@ riptides-cli context status                 # confirm
 ```
 
 Docs, including the rest of the getting-started path:
-<https://docs.riptides.io>.
+[https://docs.riptides.io](https://docs.riptides.io).
 
 ## 2. Get a node, and join it
 
 The demo needs one Linux box with riptides installed and joined. It **checks**
 that and never installs it. Either target works, and both are verified:
 
-| Target | `DEMO_TARGET` | Notes |
-|---|---|---|
-| A local **Lima** VM | `lima` (default) | The demo directory is a shared mount, so nothing is copied. |
-| **Any joined Linux box** — EC2, bare metal, a VM elsewhere | `ssh` | The demo is copied to the box. Verified on Amazon Linux 2023. |
+
+| Target                                                     | `DEMO_TARGET`    | Notes                                                         |
+| ---------------------------------------------------------- | ---------------- | ------------------------------------------------------------- |
+| A local **Lima** VM                                        | `lima` (default) | The demo directory is a shared mount, so nothing is copied.   |
+| **Any joined Linux box** — EC2, bare metal, a VM elsewhere | `ssh`            | The demo is copied to the box. Verified on Amazon Linux 2023. |
+
 
 Joining is the documented one-liner, and how the node proves who it is depends on
 what you have set up in the console first.
 
-**A join token works anywhere, including EC2.** Create a JoinToken `Verifier` and
-a `JoinToken` (console, or `riptides-cli ctl apply`), then:
+**A join token works anywhere, including EC2.** Create a JoinToken `Verifier`
+(the control plane will not accept a token without one) and a `JoinToken`. The
+token is single-use: it is deleted the moment a daemon authenticates with it.
+
+- **On Console**: System → Daemons → Authentication Methods → Enable **Join
+  Token**. Then Join Tokens → Create Join Token. Workload ID and expiration can
+  stay empty.
+- **Via Riptides CLI** — pick any secret string for `<token>` and use the same
+  value in the installer below:
+
+```bash
+riptides-cli ctl apply -f - <<'EOF'
+apiVersion: auth.riptides.io/v1alpha1
+kind: Verifier
+metadata:
+  name: jointoken
+  namespace: riptides-system
+spec:
+  joinToken: {}
+---
+apiVersion: auth.riptides.io/v1alpha1
+kind: JoinToken
+metadata:
+  name: demo
+  namespace: riptides-system
+spec:
+  token: "<token>"
+EOF
+riptides-cli ctl get verifiers
+```
+
+Then join the node:
 
 ```bash
 curl -fsSL https://docs.riptides.io/install.sh | sudo bash -s -- \
@@ -88,7 +118,9 @@ That is **not** available out of the box: configure an **AWSIID verifier in the
 console first** (Verifiers), or the join is rejected. Such a verifier also
 requires `required_metadata` — the control plane enforces it — which is what
 scopes *which* instances may join, by account, region and so on. Set that up
-before running the installer, otherwise use the join token above.
+before running the installer; otherwise, use the join token above.
+
+Detailed description of how to connect an ec2 node can be also found in our [docs](https://docs.riptides.io/guides/connect-aws-nodes/).
 
 ## 3. Point the demo at it
 
@@ -111,11 +143,11 @@ policy templating happens on your laptop, so the token has no reason to leave it
 ### What the box needs
 
 - **required** — `sudo` (passwordless), `curl`, `jq`, `pgrep`, `timeout`, and a
-  container runtime with compose support. `make check` names anything missing,
-  with the install line for that distro's package manager.
+container runtime with compose support. `make check` names anything missing,
+with the install line for that distro's package manager.
 - **evidence tools** — `tcpdump`, and `ngrep` if it is available. The payload
-  counts prefer ngrep and fall back to tcpdump, so nothing is lost where ngrep is
-  not packaged — Amazon Linux 2023 has it in neither its repos nor EPEL.
+counts prefer ngrep and fall back to tcpdump, so nothing is lost where ngrep is
+not packaged — Amazon Linux 2023 has it in neither its repos nor EPEL.
 
 `make prepare-target` installs what is missing, including the docker compose
 plugin (Amazon Linux ships docker without it, and has no nerdctl). It is a
@@ -175,32 +207,17 @@ mentions TLS, certificates or tokens.
 
 ## Act 1 — augmentation
 
-*No policy applied yet.*
+*No policy applied yet.* Following commands are run in the box.
 
-`riptides daemon augment <pid>` prints every label the daemon collected for a
+`sudo riptides daemon augment <pid>` prints every label the daemon collected for a
 process. Those labels are the entire input to identity — the selectors in acts 2
-and 3 match exactly this data. On a live run the ones that matter are
+and 3 match exactly this data. On a live run, the ones that matter are
 `process:name=nginx` with `process:binary:path=/usr/sbin/nginx`, and
 `process:name=redis-server` with `/usr/local/bin/redis-server`.
 
-Meanwhile `/proc/riptides/connections` already lists both legs, `tls: NONE` and
-**no `spiffe_id`** — the kernel traces everything by default, so the flows are
-visible before you have said anything about them.
+Meanwhile `/proc/riptides/connections` already lists both legs - each showing `tls: NONE` and `no spiffe_id` - the kernel traces everything by default, so the flows are visible before you've said anything about them.
 
 The line to land: *nothing was configured to get here.*
-
-> **No `docker:*` labels, and not because the collector is off.** It defaults to
-> enabled (`docker.go` `SetDefaults`) and this node has no `/etc/riptides/config.yaml`
-> overriding it — the `enabled: false` in the repo's `daemon/config.yaml` is a dev
-> config, not a shipped default. The collector queries the Docker API, and these
-> containers run under containerd/nerdctl, so it has nothing to say about them
-> (it is constructed `WithSkipOnSoftError`, so it stays silent). Verified: a
-> container started with `docker run` does get 8 `docker:*` labels on the same
-> node. There is no containerd collector, so a nerdctl container surfaces only
-> indirectly, as `systemd:unit=nerdctl-<id>.scope`. Run the app under docker
-> (`RT="sudo docker"`, needs the compose plugin) if you want `docker:*`
-> selectors. This demo selects on `process:*` only, so it does not depend on
-> either — and on Kubernetes the relevant collector is `kubernetes` anyway.
 
 ## Act 2 — mTLS between two internal services
 
@@ -210,49 +227,47 @@ That is the whole change.
 
 What to show, in order:
 
-1. **`tcpdump` on `lo`, before.** `GET /get HTTP/1.1` on :8080 and
-   `*3 $3 set $7 demo:ts` on :6379, in the clear.
-2. **The payload count, before and after — the same command verbatim.**
-   This is the strongest proof in the demo, because it is a count rather than a
+1. `tcpdump` **on `lo`, before.** `GET /get HTTP/1.1` on :8080 and
+  `*3 $3 set $7 demo:ts` on :6379, in the clear.
+2. **The payload count, before and after - the same command verbatim.**
+  This is the strongest proof in the demo, because it is a count rather than a
    picture. Measured on a live run:
 
-   | | before | after |
-   |---|---|---|
-   | packets carrying `GET /get` on :8080 | 4 of 20 | **0 of 21** |
-   | packets carrying `demo:ts` on :6379 | 2 of 12 | **0 of 73** |
+  |                                      | before  | after       |
+  | ------------------------------------ | ------- | ----------- |
+  | packets carrying `GET /get` on :8080 | 4 of 20 | **0 of 21** |
+  | packets carrying `demo:ts` on :6379  | 2 of 12 | **0 of 73** |
 
    Exact counts vary per run; the shape does not. Roughly the same number of
    packets, and none of them carry the payload any more — so "no hits" cannot be
    waved away as "no traffic". The app still gets its 200s and OKs.
-3. **The same count for `spiffe://` on the Redis leg, after.** 4–8 hits. The metadata
-   exchange is in the clear ahead of the handshake — identity is asserted openly
+3. **The same count for** `spiffe://` **on the Redis leg, after.** 4–8 hits. The metadata
+  exchange is in the clear ahead of the handshake — identity is asserted openly
    and then proven by the TLS that follows. The payload is what gets protected.
-
    It has to be the Redis leg: MDX runs once per *connection*, and redis-cli
-   opens a new one every iteration. On the HTTP leg nginx holds its upstream
+   opens a new one every iteration. On the HTTP leg, nginx holds its upstream
    open, so a capture usually catches reuse rather than a handshake and finds
-   nothing — which looks like a broken demo but is just keepalive.
+   nothing - which looks like a broken demo but is just a keepalive.
 4. **The Redis leg specifically.** Redis ships its own TLS support and we did
-   not switch it on (`config get tls-port` → `0`). This is a socket-level
+  not switch it on (`config get tls-port` → `0`). This is a socket-level
    mechanism, not an HTTP proxy.
-5. **`/proc/riptides/connections`.** Both legs come back
-   `tls: TLS1.2, mtls: TLS1.3` with both SPIFFE IDs populated.
+5. `/proc/riptides/connections`**.** Both legs come back
+  `tls: TLS1.2, mtls: TLS1.3` with both SPIFFE IDs populated.
 6. **The apps are untouched.** nginx still says `proxy_pass http://…`. No keys,
-   no certs, no restarts.
+  no certs, no restarts.
 7. **Revocation is a policy edit.** Re-applying redis's identity without
-   redis-cli on the inbound allow-list flips `redis OK` to
-   `redis FAIL Error: Connection reset by peer` within one reconnect; putting it
-   back recovers it.
+  redis-cli on the inbound allow-list flips `redis OK` to
+   `redis FAIL Error: Connection reset by peer` within one reconnect; putting
+   redis-cli back on the allow-list recovers Redis.
 8. **Identity is the process.** The client container's curl holds no identity for
-   :8080 and is reset, while nginx is served 200 at the same moment.
+  :8080 and is reset, while nginx receives a 200 at the same moment.
 
 ## Act 2b — passthrough: their TLS, our identity
 
 `make act2-passthrough`, then `make act2-plaintext` to put the leg back.
 
 Answers the standard objection, "we already do our own TLS". Redis is
-reconfigured to serve TLS itself on the *same* port 6379 (`--port 0
---tls-port 6379`), so the WorkloadIdentity CRDs and Services are unchanged —
+reconfigured to serve TLS itself on the *same* port 6379 (`--port 0 --tls-port 6379`), so the WorkloadIdentity CRDs and Services are unchanged —
 only the application differs, and riptides changes behaviour on its own.
 
 **It is automatic; there is no passthrough policy field.** The proto carries
@@ -274,16 +289,15 @@ throwaway CA and server cert into `app/.certs/` (gitignored), with an IP SAN for
 What to show:
 
 1. **Before the policy**, `app/redis-probe.py` reports `riptides: not managing
-   this connection`. The traffic is encrypted — by the application — and utterly
+  this connection`. The traffic is encrypted - by the application - and utterly
    anonymous. Nothing can be authorized because nobody knows who either end is.
 2. **After**, the same probe prints `negotiated ALPN: riptides/passthrough` with
-   both SPIFFE IDs. This is the driver's own `getsockopt(SOL_RIPTIDES,
-   RIPTIDES_TLS_INFO)` — the kernel answering the application directly, not an
+  both SPIFFE IDs. This is the driver's own `getsockopt(SOL_RIPTIDES,  RIPTIDES_TLS_INFO)` - the kernel answering the application directly, not an
    inference from a capture. `driver/test/passthrough.py` asserts the same value.
 3. **On the wire**, the count finds `riptides/passthrough` in the ClientHello, in
-   the clear. On the plaintext leg it reads just `riptides`.
+  the clear. On the plaintext leg it reads just `riptides`.
 4. **Revocation still bites.** Dropping redis-cli from the allow-list resets the
-   connection within one reconnect, on a flow riptides never decrypted —
+  connection within one reconnect, on a flow riptides never decrypted —
    authorization without visibility.
 
 One honest limitation worth saying out loud: `/proc/riptides/connections` shows
@@ -300,32 +314,32 @@ is meaningful again.
 Applies `policies/03-inject/` in two steps:
 
 1. the `Service` for `api.github.com:443`, the `Secret`, the `CredentialSource`,
-   **and the client's `WorkloadIdentity`**;
+  **and the client's** `WorkloadIdentity`;
 2. the `CredentialBinding`.
 
 The order matters. The binding's admission webhook rejects it unless *both* its
 `CredentialSource` **and** a `WorkloadIdentity` whose `workloadID` matches
-already exist — the second requirement is not in the docs, and the error reads
+already exist - the second requirement is not in the docs, and the error reads
 `WorkloadIdentity.core.riptides.io "demo/client/curl" not found`. The file
 numbering encodes the order.
 
 What to show:
 
 1. **The response message changes.** Before: `Requires authentication` — GitHub
-   saw no `Authorization` header. After: the caller's user JSON. If the PAT is
+  saw no `Authorization` header. After: the caller's user JSON. If the PAT is
    invalid you get `Bad credentials`, which still proves the header arrived; the
    act says so explicitly rather than claiming success.
-2. **`curl -v`.** curl's own trace of the request it wrote has no
-   `Authorization` line. The header was added after curl handed the bytes to the
+2. `curl -v`**.** curl's own trace of the request it wrote has no
+  `Authorization` line. The header was added after curl handed the bytes to the
    socket — which is why the connection had to be intercepted to be writable.
 3. **The container is still clean.** Nothing credential-shaped in `env`.
 4. **Rotation.** Re-apply the Secret with a broken value → the next request is
-   rejected. Put the real one back → recovered. No restart, no redeploy.
+  rejected. Put the real one back → recovered. No restart, no redeploy.
 
 ### Why the client mounts a CA bundle, and needs `CURL_CA_BUNDLE`
 
 Interception terminates the client's TLS with a certificate from the driver's own
-CA (`CN=TLS intercept CA`). On the host that is invisible — riptides rewrites the
+CA (`CN=TLS intercept CA`). On the host, that is invisible — riptides rewrites the
 system trust store in place. A container has its own, so `lib/preflight.sh`
 copies the driver's bundle out of
 `/sys/module/riptides/certs/ca-certificates.crt` and `compose.yaml` mounts it
@@ -333,17 +347,16 @@ over the client's `/etc/ssl/certs/ca-certificates.crt`.
 
 Mounting it is necessary but **not sufficient**: this curl verifies against the
 hashed CApath directory (`/etc/ssl/certs/*.0`), whose symlinks still point at the
-image's original certs, so it fails with `unable to get local issuer
-certificate`. `CURL_CA_BUNDLE` forces it to read the bundle file instead. Worth
+image's original certs, so it fails with `unable to get local issuer certificate`. `CURL_CA_BUNDLE` forces it to read the bundle file instead. Worth
 saying out loud — it is the one part of the demo that touches the workload.
 
 ## Diagram
 
-![Riptides capability demo — what sits where](docs/riptides-demo-architecture.preview.png)
+Riptides capability demo — what sits where
 
 What sits where, from the platform's point of view — your laptop drives it,
 the node runs it: the control plane and the
-CRDs, the daemon and the module either side of `/dev/riptides`, the five
+CRDs, the daemon and the module on either side of `/dev/riptides`, the five
 workloads inside the hooked region, and the one arrow that leaves the node.
 
 The Redis leg is annotated with both modes it can run in — act 2 terminating
@@ -351,13 +364,13 @@ mTLS on plaintext RESP, act 2b negotiating `riptides/passthrough` once Redis
 serves its own TLS — because that pair is the same policy and the same code
 path, differing only in what the application does.
 
-The dashed box top right is the part the demo does *not* exercise: the control
+The dashed box at the top right is the part the demo does *not* exercise: the control
 plane's CA self-signs here, but it can instead be chained to an external
 upstream CA — it generates a CSR for its own signing key, has that CA sign it,
 and serves the resulting chain — so Riptides can sit under an existing PKI
 rather than being its own root.
 
-Source: [`docs/riptides-demo-architecture.excalidraw`](docs/riptides-demo-architecture.excalidraw)
+Source: `[docs/riptides-demo-architecture.excalidraw](docs/riptides-demo-architecture.excalidraw)`
 — open it at excalidraw.com or with the VS Code extension. It is a normal
 hand-editable Excalidraw file, not a generated artefact to leave alone.
 
@@ -413,24 +426,27 @@ execution. Short-lived, CLI-shaped workloads are where this bites.
 Every connection is a full in-kernel mTLS handshake, a telemetry span, and a row
 in the console's connection inventory, so the demo is deliberately frugal:
 
-| | connections |
-|---|---|
-| idle (the redis-cli loop) | ~0.5/s |
-| one payload capture on :8080 | ~11 |
-| one payload capture on :6379 | ~2–4 |
-| one `conns` sample | 1–2 |
+
+|                              | connections |
+| ---------------------------- | ----------- |
+| idle (the redis-cli loop)    | ~0.5/s      |
+| one payload capture on :8080 | ~11         |
+| one payload capture on :6379 | ~2–4        |
+| one `conns` sample           | 1–2         |
+
 
 Act 2 costs about 60 connections end to end. The
-generators used to fire every 0.25s, which made a single capture open 33 —
-measure with `awk '/^Tcp:/ {n++; if (n==2) print $6}' /proc/net/snmp` (that is
+generators used to fire every 0.25s, which made a single capture open 33
+connections — measure with `awk '/^Tcp:/ {n++; if (n==2) print $6}' /proc/net/snmp` (that is
 `ActiveOpens`; do not add `PassiveOpens`, since loopback increments both for the
 same connection). Turn the idle rate down further with `INTERVAL` on the
-`redis-cli` service in `app/compose.yaml` — raise it to keep the console quiet,
-lower it for a snappier revocation demo.
+`redis-cli` service in `app/compose.yaml` — raise `INTERVAL` to keep the console
+quiet, lower it for a snappier revocation demo.
 
 ## Teardown
 
 ```bash
-make reset   # delete the demo policy, restart the app clean, ready to run again
+make reset   # delete the demo policy, restart the app cleanly, ready to run again
 make down    # also stop the containers; riptides itself is left alone
 ```
+
