@@ -6,10 +6,10 @@ getsockopt(SOL_RIPTIDES, RIPTIDES_TLS_INFO) and prints what riptides negotiated.
 That is the point of the passthrough act: rather than inferring the mode from a
 packet capture, the application asks and the kernel answers.
 
-The struct and constants are inlined from driver/include/riptides.h — the same
-shape driver/test/riptides.py uses, and the driver's own passthrough test
-asserts alpn == b"riptides/passthrough". getsockopt is a shipped API:
-riptides_getsockopt is installed on both riptides_prot and riptides_ktls_prot.
+The struct and constants below mirror the driver's public riptides.h. This is a
+supported API, not a debug hook: the kernel module installs the getsockopt
+handler on every socket it manages, so any application can ask the same question
+about its own connections.
 
 Usage: redis-probe.py [host] [port] [ca-cert]
 """
