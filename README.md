@@ -13,6 +13,9 @@ kernel's own connection table, and what the application itself sent.
 Expect about fifteen minutes end to end once you have a control plane and a
 joined node.
 
+Full product documentation, including everything the demo assumes is already
+in place: **<https://docs.riptides.io>**.
+
 
 | Act | Shows                                                                                                  | Runs                    |
 | --- | ------------------------------------------------------------------------------------------------------ | ----------------------- |
