@@ -358,32 +358,26 @@ saying out loud — it is the one part of the demo that touches the workload.
 
 ## Diagram
 
-Riptides capability demo — what sits where
+![Architecture of the demo: the laptop applying CRDs to the control plane; the node running the riptides daemon and kernel module either side of /dev/riptides; the five workloads inside the hooked region; and the single egress arrow to api.github.com](docs/riptides-demo-architecture.preview.png)
 
-What sits where, from the platform's point of view — your laptop drives it,
-the node runs it: the control plane and the
-CRDs, the daemon and the module on either side of `/dev/riptides`, the five
-workloads inside the hooked region, and the one arrow that leaves the node.
+Your laptop drives it, the node runs it: the control plane and the CRDs, the
+daemon and the module on either side of `/dev/riptides`, the five workloads
+inside the hooked region, and the one arrow that leaves the node.
 
 The Redis leg is annotated with both modes it can run in — act 2 terminating
 mTLS on plaintext RESP, act 2b negotiating `riptides/passthrough` once Redis
 serves its own TLS — because that pair is the same policy and the same code
 path, differing only in what the application does.
 
-The dashed box at the top right is the part the demo does *not* exercise: the control
-plane's CA self-signs here, but it can instead be chained to an external
+The dashed box at the top right is the part the demo does *not* exercise: the
+control plane's CA self-signs here, but it can instead be chained to an external
 upstream CA — it generates a CSR for its own signing key, has that CA sign it,
 and serves the resulting chain — so Riptides can sit under an existing PKI
 rather than being its own root.
 
-Source: `[docs/riptides-demo-architecture.excalidraw](docs/riptides-demo-architecture.excalidraw)`
-— open it at excalidraw.com or with the VS Code extension. It is a normal
-hand-editable Excalidraw file, not a generated artefact to leave alone.
-
-The `.preview.png` above (and the `.svg` beside it) is a plain-SVG
-approximation: accurate geometry and text, none of Excalidraw's hand-drawn
-styling, and it does **not** update when you edit the source. Re-export from
-Excalidraw if you change the diagram and want the preview to match.
+Source: [docs/riptides-demo-architecture.excalidraw](docs/riptides-demo-architecture.excalidraw),
+hand-editable at excalidraw.com. The preview above is exported by hand, so
+re-export it if you change the source.
 
 ## Layout
 
