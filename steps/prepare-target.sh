@@ -80,13 +80,17 @@ else
   bad "docker is not installed, so the compose plugin cannot be placed"
 fi
 
-step "docker service"
-if have docker; then
-  vmrun "sudo systemctl enable --now docker >/dev/null 2>&1; systemctl is-active docker"
-fi
+step "container runtime service"
+_svc_found=""
+for svc in containerd docker; do
+  vm "systemctl cat $svc.service >/dev/null 2>&1" 2>/dev/null || continue
+  _svc_found=1
+  vmrun "sudo systemctl enable --now $svc >/dev/null 2>&1; systemctl is-active $svc || true"
+done
+[[ -n "$_svc_found" ]] || say "no containerd or docker unit on this box"
 
 step "Where that leaves the box"
-runsh "DEMO_TARGET='$DEMO_TARGET' SSH_DEST='${SSH_DEST:-}' bash '$DEMO_DIR/lib/preflight.sh' 2>&1 | tail -12 || true"
+runsh "DEMO_TARGET='$DEMO_TARGET' SSH_DEST='${SSH_DEST:-}' env -u RT bash '$DEMO_DIR/lib/preflight.sh' 2>&1 | tail -12 || true"
 note "riptides itself is not installed by this script — see the README for the"
 note "one-liner. A join token works anywhere; on EC2 --awsiid joins on instance"
 note "identity instead, but only once an AWSIID verifier exists in the console."

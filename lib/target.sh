@@ -24,6 +24,14 @@
 
 DEMO_DIR="${DEMO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 export DEMO_DIR
+
+if [[ -f "$DEMO_DIR/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  . "$DEMO_DIR/.env"
+  set +a
+fi
+
 # Did the operator actually choose a container runtime, or is RT about to be
 # defaulted for them? Captured here because this file is sourced before anything
 # else and only once: preflight must not skip detection just because demo.sh
@@ -83,7 +91,7 @@ export TARGET_NEEDS_SYNC TARGET_LABEL SSH_DEST
 # `ssh host bash -lc "sudo id -u"` becomes `bash -lc sudo` with id and -u as $0
 # and $1. limactl passed argv straight through and never had this problem, which
 # is why it only shows up on the ssh transport, and only for multi-word commands.
-_tgt_q() { printf "'%s'" "${1//\'/\'\\\'\'}"; }
+_tgt_q() { local s=$1 q=\'; printf '%s%s%s' "$q" "${s//$q/$q\\$q$q}" "$q"; }
 
 # Run a command on the target. `bash -lc` so the login PATH applies, matching
 # what an operator would get typing it themselves. stdin is left alone, because
