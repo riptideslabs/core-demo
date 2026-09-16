@@ -64,7 +64,7 @@ that and never installs it. Either target works, and both are verified:
 
 | Target                                                     | `DEMO_TARGET`    | Notes                                                         |
 | ---------------------------------------------------------- | ---------------- | ------------------------------------------------------------- |
-| A local **Lima** VM                                        | `lima` (default) | The demo directory is a shared mount, so nothing is copied.   |
+| A local **Lima** VM                                        | `lima` (default) | The demo directory is a shared mount, so nothing is copied — it has to be writable, see §3. |
 | **Any joined Linux machine** — EC2, bare metal, a VM elsewhere | `ssh`            | The demo is copied to the machine. Verified on Amazon Linux 2023. |
 
 
@@ -132,6 +132,25 @@ Everything is driven **from your laptop**: policy applies run there with
 `riptides-cli`, and anything that has to see the kernel module, the containers or
 the wire runs on the target over ssh (the `[vm] $` lines). Lima is reached with
 the ssh config it generates itself, so there is one transport for both targets.
+
+For a **local Lima VM**, set `LIMA_VM` in `.env` unless the VM is named
+`default`, and make the home mount writable. The demo directory reaches the VM
+through that mount and is written to from the target side — `app/.ca` and
+`app/.certs` are generated there — but Lima mounts `~` read-only by default:
+
+```yaml
+# limactl stop <vm> && limactl edit <vm>
+mounts:
+- location: "~"
+  writable: true
+```
+
+Set on a VM you are *creating*, that is all — the share comes up writable on the
+first boot. Added to a VM that already exists, the flag needs one more guest
+boot: the share still mounts read-only after `limactl start`, even though the
+guest's `/etc/fstab` already says `rw`, so reboot it once with
+`limactl shell <vm> sudo reboot`. Until the mount is writable, `make check`
+stops at `the VM cannot write …`.
 
 For a remote machine, set this in `.env` (see `.env.example`):
 

@@ -83,15 +83,6 @@ _pf_ok "driver health OK"
   || _pf_die "the riptides daemon is not active — check: journalctl -u riptides -n 50"
 _pf_ok "daemon active"
 
-# Binary -> apt package, where they differ.
-_pf_pkg() {
-  case "$1" in
-    pgrep)   echo procps ;;
-    timeout) echo coreutils ;;
-    *)       echo "$1" ;;
-  esac
-}
-
 # Hard requirements. curl drives traffic and the readiness check, jq parses the
 # connections file, pgrep finds the workload pids, timeout bounds the captures,
 # riptides is the daemon binary act 1 calls for `daemon augment`.
@@ -113,11 +104,11 @@ done
 
 if [[ ${#_pf_missing_req[@]} -gt 0 || ${#_pf_missing_opt[@]} -gt 0 ]]; then
   _pf_pkgs=()
-  for t in "${_pf_missing_req[@]}" "${_pf_missing_opt[@]}"; do
+  for t in ${_pf_missing_req[@]+"${_pf_missing_req[@]}"} ${_pf_missing_opt[@]+"${_pf_missing_opt[@]}"}; do
     [[ "$t" == "riptides" ]] && continue      # not an apt package
-    _pf_pkgs+=("$(_pf_pkg "$t")")
+    _pf_pkgs+=("$t")
   done
-  for t in "${_pf_missing_opt[@]}"; do
+  for t in ${_pf_missing_opt[@]+"${_pf_missing_opt[@]}"}; do
     if [[ "$t" == ngrep ]]; then
       _pf_warn "ngrep missing — the payload counts fall back to tcpdump (fine)"
     else
@@ -142,15 +133,22 @@ fi
 # Container runtime + compose. Lima ships containerd/nerdctl; this VM's docker
 # has no compose plugin and needs root, so nerdctl is tried first.
 if [[ -z "${RT_USER_SET:-}" ]]; then
+  _rt_stopped=""
   for cand in "sudo nerdctl" "sudo docker" "docker" "nerdctl"; do
-    if _vm "$cand compose version >/dev/null 2>&1" 2>/dev/null; then
+    _vm "$cand compose version >/dev/null 2>&1" 2>/dev/null || continue
+    if _vm "$cand info >/dev/null 2>&1" 2>/dev/null; then
       RT="$cand"
       break
     fi
+    _rt_stopped="${_rt_stopped:+$_rt_stopped, }$cand"
   done
 fi
-[[ -n "${RT:-}" ]] \
-  || _pf_die "no container runtime with compose support on the target (tried nerdctl and docker)"
+if [[ -z "${RT:-}" ]]; then
+  if [[ -n "${_rt_stopped:-}" ]]; then
+    _pf_die "a container runtime is installed but its daemon is not running (tried: $_rt_stopped) — start it (sudo systemctl enable --now containerd, or docker) or run make prepare-target"
+  fi
+  _pf_die "no container runtime with compose support on the target (tried nerdctl and docker)"
+fi
 _pf_ok "container runtime: $RT"
 export RT
 
