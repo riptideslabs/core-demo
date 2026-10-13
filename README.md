@@ -195,7 +195,7 @@ make act2-plaintext     #   …and back, before act2 means anything again
 make act3               # credential injection
 
 make reset              # drop the demo policy, ready to run again
-make down               # stop and remove the containers
+make down               # drop the demo policy, remove the containers
 ```
 
 A GitHub PAT with **no scopes at all** is enough: act 3 only calls
@@ -466,6 +466,6 @@ quiet, lower it for a snappier revocation demo.
 
 ```bash
 make reset   # delete the demo policy, restart the app cleanly, ready to run again
-make down    # also stop the containers; riptides itself is left alone
+make down    # delete the demo policy and remove the containers; riptides itself is left alone
 ```
 
