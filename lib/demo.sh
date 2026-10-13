@@ -114,6 +114,39 @@ clear_policy() {
   done
 }
 
+# Delete every object any act can have created, for reset and down.
+purge_policy() {
+  # Only needed so the Secret template renders; the value is irrelevant to a delete.
+  local -x GITHUB_PAT="${GITHUB_PAT:-placeholder-for-templating-only}"
+  local f
+  # Reverse order: bindings before sources, identities before services.
+  for f in "$DEMO_DIR"/policies/04-passthrough/*.yaml \
+           "$DEMO_DIR"/policies/03-inject/20-*.yaml \
+           "$DEMO_DIR"/policies/03-inject/12-*.yaml \
+           "$DEMO_DIR"/policies/03-inject/11-*.yaml \
+           "$DEMO_DIR"/policies/03-inject/10-*.yaml \
+           "$DEMO_DIR"/policies/03-inject/00-*.yaml \
+           "$DEMO_DIR"/policies/02-mtls/1*.yaml \
+           "$DEMO_DIR"/policies/02-mtls/00-*.yaml; do
+    [[ -e "$f" ]] && delete "$f"
+  done
+  return 0
+}
+
+# Succeeds when the control plane holds no demo object; otherwise lists them.
+policy_clean() {
+  local kind names leftover=0
+  for kind in wid svc cb credsrc; do
+    names="$(ctl get "$kind" -o name 2>/dev/null | grep -E '(^|/)demo-' || true)"
+    if [[ -n "$names" ]]; then
+      leftover=1
+      bad "$kind still present:"
+      printf '%s\n' "$names" | sed 's/^/      /'
+    fi
+  done
+  return "$leftover"
+}
+
 # ── evidence helpers ────────────────────────────────────────────────────────
 # One line per live connection: where to, and whether it carries identity.
 # Sampled and filtered in the VM (lib/vm-conns.sh), which polls until a

@@ -6,7 +6,7 @@
 #   make act2    mTLS between two internal services
 #   make act3    secret injection on egress
 #   make reset   delete the demo policy, restart the app clean
-#   make down    stop the app (riptides itself is left alone)
+#   make down    delete the demo policy, stop the app (riptides is left alone)
 #
 # DEMO_NOPAUSE=1 runs an act end to end without waiting for a keypress.
 
@@ -50,7 +50,7 @@ all: up act1 act2 act3 ## Run everything in order
 reset: ## Delete the demo policy and restart the app
 	@bash $(STEPS)/reset.sh
 
-down: ## Stop and remove the app containers
+down: ## Delete the demo policy, stop and remove the app containers
 	@bash $(STEPS)/down.sh
 
 logs: ## Tail the daemon's log on the target
