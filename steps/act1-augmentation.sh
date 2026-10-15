@@ -19,8 +19,9 @@ fi
 # This act's whole point is that nothing has been configured yet, so it cannot
 # inherit policy from an earlier run.
 step "Starting from nothing"
-clear_policy 03-inject 04-passthrough 02-mtls
-settle 6
+if clear_policy 03-inject 04-passthrough 02-mtls; then
+  settle 6
+fi
 
 step "Five upstream containers, none of which knows riptides exists"
 vmrun "$COMPOSE ps"

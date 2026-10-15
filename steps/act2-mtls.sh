@@ -15,8 +15,9 @@ act "Act 2 — mTLS between two internal services, without touching either"
 # The "before" capture below has to be a genuinely unprotected wire, and act 2b
 # leaves the Redis leg on its own TLS, so clear both before claiming anything.
 step "Starting from nothing"
-clear_policy 04-passthrough 02-mtls
-settle 6
+if clear_policy 04-passthrough 02-mtls; then
+  settle 6
+fi
 
 step "Before: what is actually on the wire"
 say "The HTTP leg, tapped on loopback while a request goes through nginx:"
