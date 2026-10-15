@@ -67,8 +67,10 @@ fi
 pause
 
 step "Meanwhile the kernel is already tracing every connection"
-say "trace_all_sockets is on by default, so the flows exist before any policy does —"
-say "with byte counts and hostnames, but no identity on them yet:"
+say "trace_all_sockets is on by default, so the flows exist before any policy does."
+say "Each connection is listed once per end, CLIENT and SERVER. The kernel already"
+say "knows which process holds each end (proc, peer_proc), but none has a SPIFFE"
+say "identity yet, so id and peer are empty:"
 conns 8080 "curl -s -o /dev/null http://127.0.0.1:8000/get"
 conns 6379 "$RT exec demo-redis redis-cli -h 127.0.0.1 -p 6379 -r 10 -i 0.2 ping"
 pause

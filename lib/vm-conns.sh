@@ -22,10 +22,15 @@ if [[ -n "$gen" ]]; then
     genpid=$!
 fi
 
+# A local connection is listed once per end, both with the same src. dir and the
+# two process identities (each end's proc is the other's peer_proc) tell those
+# two lines apart; src tells connections apart.
 filter='
   select($p == "." or (.dst_port|tostring) == $p or (.src_port|tostring) == $p)
-  | {dst: "\(.dst):\(.dst_port)", tls: .tls_version, mtls: .mtls_version,
-     id: .spiffe_id, peer: .peer_spiffe_id}'
+  | {dir: .direction, src: "\(.src):\(.src_port)", dst: "\(.dst):\(.dst_port)",
+     tls: .tls_version,
+     mtls: .mtls_version, proc: .process_identity,
+     peer_proc: .peer_process_identity, id: .spiffe_id, peer: .peer_spiffe_id}'
 
 found=""
 for _ in $(seq 40); do
