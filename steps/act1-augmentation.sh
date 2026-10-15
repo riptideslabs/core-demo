@@ -8,6 +8,14 @@ source "$DEMO_DIR/lib/demo.sh"
 
 act "Act 1 — augmentation: identity out of a running process"
 
+# Checked up front: the curl below would otherwise fail first, with only exit 7.
+# Anchored, or pgrep -f matches the `bash -lc` wrapper carrying this very pattern.
+NGINX_PID="$(vm "pgrep -f '^nginx: worker' | head -1" 2>/dev/null || true)"
+if [[ -z "$NGINX_PID" ]]; then
+  bad "no nginx worker found in the VM — is the app running? (make up)"
+  exit 1
+fi
+
 # This act's whole point is that nothing has been configured yet, so it cannot
 # inherit policy from an earlier run.
 step "Starting from nothing"
@@ -25,11 +33,6 @@ vmrun "$RT logs --tail 2 demo-redis-cli"
 pause
 
 step "What the daemon knows about the nginx worker, right now"
-NGINX_PID="$(vm "pgrep -f 'nginx: worker' | head -1" 2>/dev/null || true)"
-if [[ -z "$NGINX_PID" ]]; then
-  bad "no nginx worker found in the VM — is the app running? (make up)"
-  exit 1
-fi
 say "pid $NGINX_PID, discovered from the VM's process table"
 vmrun "sudo riptides daemon augment $NGINX_PID"
 pause
