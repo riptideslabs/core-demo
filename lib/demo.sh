@@ -103,15 +103,22 @@ delete() {
 # earlier run turns their opening evidence into a false negative — the capture
 # shows zero plaintext and the narration says the opposite of the screen. Each
 # act that makes such a claim clears what it needs first.
+#
+# Succeeds only if something was deleted, so the caller settles only then. ctl
+# prints nothing for an object that was not there (--ignore-not-found).
 clear_policy() {
-  local d f
+  local d f out removed=""
   for d in "$@"; do
     # 20-binding before 1x-source/identity before 0x-service.
     for f in "$DEMO_DIR/policies/$d"/2*.yaml "$DEMO_DIR/policies/$d"/1*.yaml \
              "$DEMO_DIR/policies/$d"/0*.yaml; do
-      [[ -e "$f" ]] && delete "$f"
+      [[ -e "$f" ]] || continue
+      out="$(delete "$f")"
+      [[ -n "$out" ]] && { printf '%s\n' "$out"; removed=1; }
     done
   done
+  [[ -n "$removed" ]] || note "no demo policy left over from an earlier run"
+  [[ -n "$removed" ]]
 }
 
 # Delete every object any act can have created, for reset and down.
@@ -200,7 +207,7 @@ metric() {
 # assume it already has.
 settle() {
   local secs="${1:-4}"
-  printf '  %s… waiting %ss for the policy to reach the kernel%s\n' "$DIM" "$secs" "$N"
+  printf '  %s… waiting %ss for the change to reach the kernel%s\n' "$DIM" "$secs" "$N"
   sleep "$secs"
 }
 

@@ -27,8 +27,9 @@ act "Act 3 — the credential the workload never has"
 # to start from nothing. Left-over policy from an earlier run would make the
 # first request succeed and turn the narration into a lie.
 step "Starting from nothing"
-clear_policy 03-inject
-settle 8
+if clear_policy 03-inject; then
+  settle 8
+fi
 
 step "The client container, before anything is applied"
 vmrun "$RT exec demo-client env | grep -iE 'token|pat|auth|secret|key' || echo '(nothing credential-shaped in the environment)'"

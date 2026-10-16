@@ -111,10 +111,12 @@ export TDIR
 # .env holds the PAT and templating happens host-side, so the token never needs
 # to reach the target; .ca and .certs are generated ON the target and would be
 # clobbered by the host's copies; docs/ is a 300 KB diagram nothing there reads.
+# --no-xattrs: macOS tar ships xattrs like com.apple.provenance, which GNU tar on
+# the target warns about once per file.
 target_sync() {
   [[ -n "$TARGET_NEEDS_SYNC" ]] || return 0
   vm "mkdir -p '$TDIR'"
-  tar -C "$DEMO_DIR" \
+  tar -C "$DEMO_DIR" --no-xattrs \
       --exclude='.env' --exclude='.git' --exclude='.DS_Store' \
       --exclude='docs' --exclude='app/.ca' --exclude='app/.certs' \
       -czf - . | vm "tar -C '$TDIR' -xzf -"

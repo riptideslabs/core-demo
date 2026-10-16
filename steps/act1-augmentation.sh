@@ -8,11 +8,20 @@ source "$DEMO_DIR/lib/demo.sh"
 
 act "Act 1 — augmentation: identity out of a running process"
 
+# Checked up front: the curl below would otherwise fail first, with only exit 7.
+# Anchored, or pgrep -f matches the `bash -lc` wrapper carrying this very pattern.
+NGINX_PID="$(vm "pgrep -f '^nginx: worker' | head -1" 2>/dev/null || true)"
+if [[ -z "$NGINX_PID" ]]; then
+  bad "no nginx worker found in the VM — is the app running? (make up)"
+  exit 1
+fi
+
 # This act's whole point is that nothing has been configured yet, so it cannot
 # inherit policy from an earlier run.
 step "Starting from nothing"
-clear_policy 03-inject 04-passthrough 02-mtls
-settle 6
+if clear_policy 03-inject 04-passthrough 02-mtls; then
+  settle 6
+fi
 
 step "Five upstream containers, none of which knows riptides exists"
 vmrun "$COMPOSE ps"
@@ -25,11 +34,6 @@ vmrun "$RT logs --tail 2 demo-redis-cli"
 pause
 
 step "What the daemon knows about the nginx worker, right now"
-NGINX_PID="$(vm "pgrep -f 'nginx: worker' | head -1" 2>/dev/null || true)"
-if [[ -z "$NGINX_PID" ]]; then
-  bad "no nginx worker found in the VM — is the app running? (make up)"
-  exit 1
-fi
 say "pid $NGINX_PID, discovered from the VM's process table"
 vmrun "sudo riptides daemon augment $NGINX_PID"
 pause
@@ -64,8 +68,10 @@ fi
 pause
 
 step "Meanwhile the kernel is already tracing every connection"
-say "trace_all_sockets is on by default, so the flows exist before any policy does —"
-say "with byte counts and hostnames, but no identity on them yet:"
+say "trace_all_sockets is on by default, so the flows exist before any policy does."
+say "Each connection is listed once per end, CLIENT and SERVER. The kernel already"
+say "knows which process holds each end (proc, peer_proc), but none has a SPIFFE"
+say "identity yet, so id and peer are empty:"
 conns 8080 "curl -s -o /dev/null http://127.0.0.1:8000/get"
 conns 6379 "$RT exec demo-redis redis-cli -h 127.0.0.1 -p 6379 -r 10 -i 0.2 ping"
 pause
